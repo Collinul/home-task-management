@@ -36,7 +36,6 @@ export const DayColumn: React.FC<DayColumnProps> = ({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
       className={isDragging ? 'z-10' : ''}
     >
       <TaskCard
@@ -45,6 +44,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({
         onDelete={onDelete}
         onEdit={onEdit}
         isDragging={isDragging}
+        dragHandleProps={listeners}
       />
     </div>
   );

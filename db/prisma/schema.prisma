@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String            @id @default(cuid())
+  email      String            @unique
+  name       String?
+  password   String
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  categories Category[]
+  households HouseholdMember[]
+  tasks      Task[]
+}
+
+model Household {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  categories  Category[]
+  members     HouseholdMember[]
+  tasks       Task[]
+}
+
+model HouseholdMember {
+  id          String    @id @default(cuid())
+  userId      String
+  householdId String
+  role        String    @default("member")
+  joinedAt    DateTime  @default(now())
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, householdId])
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  emoji       String?
+  color       String?
+  userId      String?
+  householdId String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  household   Household? @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+
+  @@unique([name, userId])
+  @@unique([name, householdId])
+}
+
+model Task {
+  id               String          @id @default(cuid())
+  title            String
+  description      String?
+  isCompleted      Boolean         @default(false)
+  completedAt      DateTime?
+  dueDate          DateTime
+  estimatedMinutes Int?
+  actualMinutes    Int?
+  priority         String          @default("medium")
+  userId           String?
+  categoryId       String
+  householdId      String?
+  assignedToId     String?
+  parentTaskId     String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  recurrenceRule   RecurrenceRule?
+  category         Category        @relation(fields: [categoryId], references: [id])
+  household        Household?      @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  parentTask       Task?           @relation("SubTasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subTasks         Task[]          @relation("SubTasks")
+  user             User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskHistory      TaskHistory[]
+
+  @@index([userId])
+  @@index([dueDate])
+  @@index([categoryId])
+  @@index([householdId])
+}
+
+model RecurrenceRule {
+  id          String    @id @default(cuid())
+  taskId      String    @unique
+  frequency   String
+  interval    Int       @default(1)
+  daysOfWeek  String[]
+  dayOfMonth  Int?
+  endDate     DateTime?
+  occurrences Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model TaskHistory {
+  id             String    @id @default(cuid())
+  taskId         String
+  action         String
+  completedBy    String?
+  completionTime DateTime?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  task           Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([createdAt])
+}

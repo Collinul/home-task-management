@@ -14,6 +14,7 @@ export const WeeklyView: React.FC = () => {
   const { state, addTask, toggleTask, moveTask, deleteTask, nextWeek, previousWeek, goToToday } = useTaskContext();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isCompact, setIsCompact] = useState(false);
+  const [isCalendarCollapsed, setIsCalendarCollapsed] = useState(false);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
@@ -94,7 +95,23 @@ export const WeeklyView: React.FC = () => {
 
           {/* View Toggle */}
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-gray-900">This Week</h1>
+            <div className="flex items-center space-x-3">
+              <h1 className="text-lg font-semibold text-gray-900">This Week</h1>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsCalendarCollapsed(!isCalendarCollapsed)}
+                className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+                title={isCalendarCollapsed ? 'Expand Calendar' : 'Collapse Calendar'}
+              >
+                <svg 
+                  className={`w-5 h-5 transition-transform duration-200 ${isCalendarCollapsed ? 'rotate-180' : ''}`} 
+                  fill="currentColor" 
+                  viewBox="0 0 20 20"
+                >
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </motion.button>
+            </div>
             
             <motion.button
               whileTap={{ scale: 0.95 }}
@@ -107,120 +124,157 @@ export const WeeklyView: React.FC = () => {
         </div>
 
         {/* Day Headers */}
-        <div className={`grid ${isCompact ? 'grid-cols-7' : 'grid-cols-1 gap-1'} px-4 pb-3`}>
-          {weekDays.map((day, index) => (
-            <div
-              key={day.toISOString()}
-              className={`
-                text-center py-2 rounded-lg
-                ${new Date().toDateString() === day.toDateString() 
-                  ? 'bg-orange-100 text-orange-800' 
-                  : 'text-gray-600'
-                }
-                ${isCompact ? 'text-xs' : 'text-sm font-medium'}
-              `}
+        <AnimatePresence>
+          {!isCalendarCollapsed && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
             >
-              <div className={isCompact ? '' : 'flex items-center justify-between'}>
-                <span>{isCompact ? formatShortDayName(day) : formatDayName(day)}</span>
-                {!isCompact && (
-                  <span className="text-xs text-gray-400">{format(day, 'MMM dd')}</span>
-                )}
+              <div className={`grid ${isCompact ? 'grid-cols-7' : 'grid-cols-1 gap-1'} px-4 pb-3`}>
+                {weekDays.map((day, index) => (
+                  <div
+                    key={day.toISOString()}
+                    className={`
+                      text-center py-2 rounded-lg
+                      ${new Date().toDateString() === day.toDateString() 
+                        ? 'bg-orange-100 text-orange-800' 
+                        : 'text-gray-600'
+                      }
+                      ${isCompact ? 'text-xs' : 'text-sm font-medium'}
+                    `}
+                  >
+                    <div className={isCompact ? '' : 'flex items-center justify-between'}>
+                      <span>{isCompact ? formatShortDayName(day) : formatDayName(day)}</span>
+                      {!isCompact && (
+                        <span className="text-xs text-gray-400">{format(day, 'MMM dd')}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Tasks Grid */}
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className={`
-          flex-1 overflow-auto px-4 py-4
-          ${isCompact ? 'grid grid-cols-7 gap-2' : 'space-y-4'}
-        `}>
-          {weekDays.map((day, index) => {
-            const dayOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][index] as DayOfWeek;
-            const dayTasks = state.currentWeek.tasks[dayOfWeek] || [];
+      <AnimatePresence>
+        {!isCalendarCollapsed && (
+          <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`
+                flex-1 overflow-auto px-4 py-4
+                ${isCompact ? 'grid grid-cols-7 gap-2' : 'space-y-4'}
+              `}
+            >
+              {weekDays.map((day, index) => {
+                const dayOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][index] as DayOfWeek;
+                const dayTasks = state.currentWeek.tasks[dayOfWeek] || [];
 
-            return (
-              <motion.div
-                key={day.toISOString()}
-                layout
-                className={isCompact ? '' : 'mb-4'}
-              >
-                {!isCompact && (
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-base font-medium text-gray-800">
-                      {formatDayName(day)}
-                    </h2>
-                    <span className="text-sm text-gray-500">
-                      {dayTasks.filter(t => !t.isCompleted).length} pending
-                    </span>
-                  </div>
-                )}
-
-                <SortableContext items={dayTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-                  <div
-                    id={`day-${index}`}
-                    className={`
-                      min-h-[100px] rounded-lg border-2 border-dashed border-gray-200 p-3
-                      ${isCompact ? 'h-full' : ''}
-                      ${dayTasks.length === 0 ? 'flex items-center justify-center' : ''}
-                    `}
+                return (
+                  <motion.div
+                    key={day.toISOString()}
+                    layout
+                    className={isCompact ? '' : 'mb-4'}
                   >
-                    {dayTasks.length === 0 ? (
-                      <div className="text-center text-gray-400">
-                        <div className="text-2xl mb-1">🌱</div>
-                        <p className={`text-xs ${isCompact ? 'hidden' : ''}`}>
-                          No tasks yet
-                        </p>
-                      </div>
-                    ) : (
-                      <div className={isCompact ? 'space-y-1' : 'space-y-2'}>
-                        <AnimatePresence>
-                          {dayTasks
-                            .filter(task => state.showCompletedTasks || !task.isCompleted)
-                            .map((task) => (
-                              <motion.div key={task.id}>
-                                {isCompact ? (
-                                  <div
-                                    className={`
-                                      w-full p-2 rounded text-xs bg-white shadow-sm border
-                                      ${task.isCompleted ? 'opacity-60 line-through' : ''}
-                                      cursor-pointer hover:shadow-md transition-all
-                                    `}
-                                    onClick={() => toggleTask(task.id)}
-                                  >
-                                    <div className="truncate font-medium">{task.title}</div>
-                                    {task.estimatedMinutes && (
-                                      <div className="text-gray-500 text-xs mt-1">
-                                        ⏱️ {task.estimatedMinutes}m
-                                      </div>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <DayColumn
-                                    task={task}
-                                    onToggle={toggleTask}
-                                    onDelete={deleteTask}
-                                    onEdit={handleEditTask}
-                                  />
-                                )}
-                              </motion.div>
-                          ))}
-                        </AnimatePresence>
+                    {!isCompact && (
+                      <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-base font-medium text-gray-800">
+                          {formatDayName(day)}
+                        </h2>
+                        <span className="text-sm text-gray-500">
+                          {dayTasks.filter(t => !t.isCompleted).length} pending
+                        </span>
                       </div>
                     )}
-                  </div>
-                </SortableContext>
-              </motion.div>
-            );
-          })}
-        </div>
 
-        <DragOverlay>
-          {activeTask ? <TaskCard task={activeTask} onToggle={() => {}} isDragging /> : null}
-        </DragOverlay>
-      </DndContext>
+                    <SortableContext items={dayTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                      <div
+                        id={`day-${index}`}
+                        className={`
+                          min-h-[200px] rounded-lg border-2 border-dashed border-gray-200 p-4
+                          ${isCompact ? 'h-full min-h-[150px]' : ''}
+                          ${dayTasks.length === 0 ? 'flex items-center justify-center' : ''}
+                        `}
+                      >
+                        {dayTasks.length === 0 ? (
+                          <div className="text-center text-gray-400">
+                            <div className="text-2xl mb-1">🌱</div>
+                            <p className={`text-xs ${isCompact ? 'hidden' : ''}`}>
+                              No tasks yet
+                            </p>
+                          </div>
+                        ) : (
+                          <div className={isCompact ? 'space-y-1' : 'space-y-2'}>
+                            <AnimatePresence>
+                              {dayTasks
+                                .filter(task => state.showCompletedTasks || !task.isCompleted)
+                                .map((task) => (
+                                  <motion.div key={task.id}>
+                                    {isCompact ? (
+                                      <div
+                                        className={`
+                                          w-full p-2 rounded text-xs bg-white shadow-sm border
+                                          ${task.isCompleted ? 'opacity-60 line-through' : ''}
+                                          cursor-pointer hover:shadow-md transition-all
+                                        `}
+                                        onClick={() => toggleTask(task.id)}
+                                      >
+                                        <div className="truncate font-medium">{task.title}</div>
+                                        {task.estimatedMinutes && (
+                                          <div className="text-gray-500 text-xs mt-1">
+                                            ⏱️ {task.estimatedMinutes}m
+                                          </div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <DayColumn
+                                        task={task}
+                                        onToggle={toggleTask}
+                                        onDelete={deleteTask}
+                                        onEdit={handleEditTask}
+                                      />
+                                    )}
+                                  </motion.div>
+                              ))}
+                            </AnimatePresence>
+                          </div>
+                        )}
+                      </div>
+                    </SortableContext>
+                  </motion.div>
+                );
+          })}
+            </motion.div>
+
+            <DragOverlay>
+              {activeTask ? <TaskCard task={activeTask} onToggle={() => {}} isDragging /> : null}
+            </DragOverlay>
+          </DndContext>
+        )}
+      </AnimatePresence>
+
+      {/* Collapsed State Message */}
+      {isCalendarCollapsed && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex-1 flex items-center justify-center"
+        >
+          <div className="text-center p-8">
+            <div className="text-4xl mb-4">📅</div>
+            <h3 className="text-lg font-medium text-gray-600 mb-2">Calendar Collapsed</h3>
+            <p className="text-sm text-gray-500">Click the arrow above to expand the calendar view</p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Floating Action Button */}
       <motion.button
@@ -240,10 +294,10 @@ export const WeeklyView: React.FC = () => {
             initialData={editingTask ? {
               title: editingTask.title,
               description: editingTask.description || '',
-              category: editingTask.category,
+              categoryId: editingTask.categoryId,
               estimatedMinutes: editingTask.estimatedMinutes || 20,
-              dueDate: editingTask.dueDate,
-              isRecurring: editingTask.isRecurring
+              priority: editingTask.priority,
+              dueDate: editingTask.dueDate
             } : undefined}
             onSubmit={handleAddTask}
             onCancel={handleCloseForm}

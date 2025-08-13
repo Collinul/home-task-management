@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { TaskFormData, TaskCategory } from '../../types';
+import { TaskFormData } from '../../types';
+import { useTaskContext } from '../../contexts/TaskContext';
 import { getTaskEstimate, getTaskSuggestion } from '../../data/taskEstimates';
 import { format } from 'date-fns';
 
@@ -10,46 +11,41 @@ interface TaskFormProps {
   onCancel: () => void;
 }
 
-const categories: { value: TaskCategory; label: string; emoji: string }[] = [
-  { value: 'cleaning', label: 'Cleaning', emoji: '🧹' },
-  { value: 'cooking', label: 'Cooking', emoji: '👩‍🍳' },
-  { value: 'shopping', label: 'Shopping', emoji: '🛒' },
-  { value: 'laundry', label: 'Laundry', emoji: '👔' },
-  { value: 'maintenance', label: 'Maintenance', emoji: '🔧' },
-  { value: 'organization', label: 'Organization', emoji: '📋' },
-  { value: 'outdoor', label: 'Outdoor', emoji: '🌱' },
-  { value: 'personal', label: 'Personal', emoji: '💫' },
-  { value: 'other', label: 'Other', emoji: '📝' },
-];
-
 export const TaskForm: React.FC<TaskFormProps> = ({
   initialData,
   onSubmit,
   onCancel
 }) => {
+  const { state } = useTaskContext();
+  const { categories } = state;
+  
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
-    category: 'cleaning',
+    categoryId: categories[0]?.id || '',
     estimatedMinutes: 20,
+    priority: 'medium',
     dueDate: new Date(),
-    isRecurring: false,
     ...initialData
   });
 
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showEstimateHelp, setShowEstimateHelp] = useState(false);
 
-  useEffect(() => {
-    setSuggestions(getTaskSuggestion(formData.category));
-  }, [formData.category]);
+  const currentCategory = categories.find(c => c.id === formData.categoryId);
 
   useEffect(() => {
-    if (formData.title) {
-      const estimate = getTaskEstimate(formData.title, formData.category);
+    if (currentCategory) {
+      setSuggestions(getTaskSuggestion(currentCategory.name.toLowerCase()));
+    }
+  }, [currentCategory]);
+
+  useEffect(() => {
+    if (formData.title && currentCategory) {
+      const estimate = getTaskEstimate(formData.title, currentCategory.name.toLowerCase());
       setFormData(prev => ({ ...prev, estimatedMinutes: estimate.minutes }));
     }
-  }, [formData.title, formData.category]);
+  }, [formData.title, currentCategory]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +53,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    const estimate = getTaskEstimate(suggestion, formData.category);
+    const estimate = getTaskEstimate(suggestion, currentCategory?.name.toLowerCase() || '');
     setFormData(prev => ({
       ...prev,
       title: suggestion,
@@ -118,20 +114,20 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             <div className="grid grid-cols-3 gap-2">
               {categories.map((category) => (
                 <motion.button
-                  key={category.value}
+                  key={category.id}
                   type="button"
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setFormData(prev => ({ ...prev, category: category.value }))}
+                  onClick={() => setFormData(prev => ({ ...prev, categoryId: category.id }))}
                   className={`
                     p-3 rounded-lg border-2 text-center transition-colors
-                    ${formData.category === category.value
+                    ${formData.categoryId === category.id
                       ? 'border-orange-500 bg-orange-50 text-orange-700'
                       : 'border-gray-200 hover:border-orange-200'
                     }
                   `}
                 >
                   <div className="text-lg">{category.emoji}</div>
-                  <div className="text-xs font-medium">{category.label}</div>
+                  <div className="text-xs font-medium">{category.name}</div>
                 </motion.button>
               ))}
             </div>
@@ -229,19 +225,30 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             )}
           </div>
 
-          {/* Recurring Task */}
+          {/* Priority */}
           <div className="mb-6">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.isRecurring}
-                onChange={(e) => setFormData(prev => ({ ...prev, isRecurring: e.target.checked }))}
-                className="mr-3 w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                🔄 Make this a recurring task
-              </span>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Priority
             </label>
+            <div className="flex space-x-2">
+              {(['low', 'medium', 'high'] as const).map((priority) => (
+                <motion.button
+                  key={priority}
+                  type="button"
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setFormData(prev => ({ ...prev, priority }))}
+                  className={`
+                    px-4 py-2 rounded-lg border-2 text-sm font-medium transition-colors capitalize
+                    ${formData.priority === priority
+                      ? 'border-orange-500 bg-orange-50 text-orange-700'
+                      : 'border-gray-200 hover:border-orange-200 text-gray-600'
+                    }
+                  `}
+                >
+                  {priority}
+                </motion.button>
+              ))}
+            </div>
           </div>
 
           {/* Action Buttons */}

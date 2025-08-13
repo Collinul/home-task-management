@@ -1,35 +1,34 @@
-export type TaskCategory = 
-  | 'cleaning' 
-  | 'cooking' 
-  | 'shopping' 
-  | 'laundry' 
-  | 'maintenance' 
-  | 'organization' 
-  | 'outdoor'
-  | 'personal'
-  | 'other';
+import { Category } from '@prisma/client';
+
+export type TaskCategory = string;
 
 export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
 
 export type RecurrencePattern = {
-  type: 'weekly' | 'daily' | 'custom';
-  days: DayOfWeek[];
+  frequency: string;
+  interval?: number;
+  daysOfWeek?: string[];
+  dayOfMonth?: number;
+  endDate?: Date;
+  occurrences?: number;
 };
 
 export interface Task {
   id: string;
   title: string;
   description?: string;
-  category: TaskCategory;
+  category: string;
+  categoryId: string;
   estimatedMinutes?: number;
+  actualMinutes?: number;
+  priority: 'low' | 'medium' | 'high';
   isCompleted: boolean;
   completedAt?: Date;
   dueDate: Date;
   createdAt: Date;
   updatedAt: Date;
   recurrence?: RecurrencePattern;
-  isRecurring: boolean;
-  originalTaskId?: string;
+  parentTaskId?: string;
 }
 
 export interface WeeklyView {
@@ -45,14 +44,14 @@ export interface TaskStatistics {
   longestStreak: number;
   totalTasksCompleted: number;
   averageCompletionTime: number;
-  categoryStats: Record<TaskCategory, number>;
+  categoryStats: Record<string, number>;
 }
 
 export interface User {
   id: string;
-  name: string;
+  name?: string;
   email: string;
-  preferences: {
+  preferences?: {
     theme: 'light' | 'dark' | 'auto';
     notifications: boolean;
     startDayOfWeek: DayOfWeek;
@@ -62,17 +61,18 @@ export interface User {
 
 export interface TaskFormData {
   title: string;
-  description: string;
-  category: TaskCategory;
-  estimatedMinutes: number;
+  description?: string;
+  categoryId: string;
+  estimatedMinutes?: number;
+  priority?: 'low' | 'medium' | 'high';
   dueDate: Date;
-  isRecurring: boolean;
-  recurrence?: RecurrencePattern;
+  recurrenceRule?: RecurrencePattern;
 }
 
 export interface AppState {
   user: User | null;
   tasks: Task[];
+  categories: Category[];
   currentWeek: WeeklyView;
   isLoading: boolean;
   error: string | null;

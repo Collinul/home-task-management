@@ -9,6 +9,7 @@ interface TaskCardProps {
   onEdit?: (task: Task) => void;
   onDelete?: (id: string) => void;
   isDragging?: boolean;
+  dragHandleProps?: any;
 }
 
 const categoryColors: Record<TaskCategory, string> = {
@@ -40,7 +41,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onToggle,
   onEdit,
   onDelete,
-  isDragging = false
+  isDragging = false,
+  dragHandleProps
 }) => {
   return (
     <motion.div
@@ -50,7 +52,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       exit={{ opacity: 0, y: -20 }}
       whileTap={{ scale: 0.98 }}
       className={`
-        bg-white rounded-lg shadow-sm border-2 p-4 mb-3 touch-manipulation
+        bg-white rounded-lg shadow-sm border-2 p-5 mb-4 touch-manipulation
         ${task.isCompleted ? 'opacity-70 border-gray-200' : 'border-white hover:border-orange-200'}
         ${isDragging ? 'shadow-lg transform rotate-3' : ''}
         transition-all duration-200
@@ -97,14 +99,28 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               {task.title}
             </h3>
             
-            {/* Category Badge */}
-            <span className={`
-              inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border
-              ${categoryColors[task.category]}
-            `}>
-              <span className="mr-1">{categoryEmojis[task.category]}</span>
-              {task.category}
-            </span>
+            <div className="flex items-center space-x-2">
+              {/* Drag Handle */}
+              {dragHandleProps && (
+                <button
+                  {...dragHandleProps}
+                  className="cursor-grab active:cursor-grabbing p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+              )}
+              
+              {/* Category Badge */}
+              <span className={`
+                inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border
+                ${categoryColors[task.category]}
+              `}>
+                <span className="mr-1">{categoryEmojis[task.category]}</span>
+                {task.category}
+              </span>
+            </div>
           </div>
 
           {task.description && (
@@ -124,9 +140,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 </span>
               )}
               
-              {task.isRecurring && (
+              {task.parentTaskId && (
                 <span className="flex items-center">
-                  🔄 Recurring
+                  📋 Subtask
                 </span>
               )}
             </div>
