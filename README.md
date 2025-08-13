@@ -1,4 +1,4 @@
-# TaskLove 💕 - Household Task Manager
+# Checklist 📋 - Household Task Manager
 
 A beautiful and intuitive household task management app designed with love! 
 
@@ -49,7 +49,7 @@ npm run build
 ### To Install as PWA:
 1. Visit the app in your mobile browser
 2. Look for "Add to Home Screen" option
-3. Tap to install - it will appear as "TaskLove" on your home screen!
+3. Tap to install - it will appear as "Checklist" on your home screen!
 
 ## 📱 How to Use
 
@@ -85,7 +85,7 @@ npm run build
 
 ## 💝 Made with Love
 
-This app was created as a thoughtful birthday gift! It includes sample tasks to get you started, but you can customize everything to match your household routine.
+This app was created as a thoughtful gift! It includes sample tasks to get you started, but you can customize everything to match your household routine.
 
 ## 🎯 Tips for Best Experience
 

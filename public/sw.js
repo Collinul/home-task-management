@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tasklove-v1';
+const CACHE_NAME = 'checklist-v1';
 const urlsToCache = [
   '/',
   '/static/js/bundle.js',

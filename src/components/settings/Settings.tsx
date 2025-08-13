@@ -11,7 +11,7 @@ export const Settings: React.FC = () => {
             Settings ⚙️
           </h1>
           <p className="text-gray-600">
-            Customize your TaskLove experience
+            Customize your Checklist experience
           </p>
         </div>
       </div>
@@ -64,16 +64,16 @@ export const Settings: React.FC = () => {
         >
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <span className="mr-2">💝</span>
-            About TaskLove
+            About Checklist
           </h3>
           
           <div className="space-y-3 text-gray-600">
             <p>
-              TaskLove was created as a thoughtful birthday gift to help make household 
-              management more joyful and rewarding.
+              Checklist was created as a thoughtful gift to help make household 
+              management more organized and rewarding.
             </p>
             <p>
-              Version 1.0 • Built with React, TypeScript, and lots of love 💕
+              Version 1.0 • Built with React, TypeScript, and care 💕
             </p>
           </div>
         </motion.div>
@@ -113,7 +113,7 @@ export const Settings: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium text-gray-900">Install as App</div>
-                  <div className="text-sm text-gray-600">Add TaskLove to your home screen</div>
+                  <div className="text-sm text-gray-600">Add Checklist to your home screen</div>
                 </div>
                 <span className="text-blue-500">📱</span>
               </div>

@@ -1,10 +1,10 @@
 import { Task, User } from '../types';
 
 const STORAGE_KEYS = {
-  TASKS: 'household-tasks',
-  USER: 'household-user',
-  THEME: 'household-theme',
-  LAST_SYNC: 'household-last-sync'
+  TASKS: 'checklist-tasks',
+  USER: 'checklist-user', 
+  THEME: 'checklist-theme',
+  LAST_SYNC: 'checklist-last-sync'
 } as const;
 
 export class LocalStorageManager {

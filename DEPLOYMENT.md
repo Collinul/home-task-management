@@ -1,6 +1,6 @@
-# 🚀 Deployment Guide for TaskLove
+# 🚀 Deployment Guide for Checklist
 
-Your TaskLove app is ready to deploy! Here are several options to get it online:
+Your Checklist app is ready to deploy! Here are several options to get it online:
 
 ## Option 1: Vercel (Recommended) ⭐
 
@@ -21,12 +21,12 @@ Vercel is perfect for React apps and provides excellent PWA support.
    vercel --prod
    ```
 5. **Follow the prompts**:
-   - Project name: `tasklove` (or any name you prefer)
+   - Project name: `checklist` (or any name you prefer)
    - Build command: `npm run build` (default)
    - Output directory: `build` (default)
 
 ### Expected Result:
-- You'll get a URL like: `https://tasklove-xyz.vercel.app`
+- You'll get a URL like: `https://checklist-xyz.vercel.app`
 - The app will be live instantly with HTTPS
 - PWA features will work perfectly
 - Automatic deployments on future updates
@@ -59,7 +59,7 @@ Free hosting through GitHub (requires public repository).
    git add .
    git commit -m "Initial commit - TaskLove PWA"
    git branch -M main
-   git remote add origin https://github.com/yourusername/tasklove.git
+   git remote add origin https://github.com/yourusername/checklist.git
    git push -u origin main
    ```
 
@@ -71,7 +71,7 @@ Free hosting through GitHub (requires public repository).
 3. **Add to package.json**:
    ```json
    {
-     "homepage": "https://yourusername.github.io/tasklove",
+     "homepage": "https://yourusername.github.io/checklist",
      "scripts": {
        "predeploy": "npm run build",
        "deploy": "gh-pages -d build"
@@ -113,7 +113,7 @@ Google's hosting platform with excellent PWA support.
 
 ```bash
 # Navigate to your project
-cd /Users/I561796/Documents/Projects/household-task-management
+cd /path/to/your/checklist-project
 
 # Login to Vercel (one-time setup)
 vercel login

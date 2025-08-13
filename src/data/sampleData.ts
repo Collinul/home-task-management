@@ -212,7 +212,7 @@ export const sampleTasks: Task[] = [
 ];
 
 export function loadSampleData(): boolean {
-  const hasExistingTasks = localStorage.getItem('household-tasks');
+  const hasExistingTasks = localStorage.getItem('checklist-tasks');
   if (!hasExistingTasks) {
     const serializedTasks = sampleTasks.map(task => ({
       ...task,
@@ -221,7 +221,7 @@ export function loadSampleData(): boolean {
       updatedAt: task.updatedAt.toISOString(),
       completedAt: task.completedAt?.toISOString()
     }));
-    localStorage.setItem('household-tasks', JSON.stringify(serializedTasks));
+    localStorage.setItem('checklist-tasks', JSON.stringify(serializedTasks));
     return true;
   }
   return false;
