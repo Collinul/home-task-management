@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckSquare, Clock, AlertCircle, TrendingUp, Calendar, Loader2 } from "lucide-react"
+import { CheckSquare, Clock, AlertCircle, TrendingUp, Calendar } from "lucide-react"
 import { DashboardStats, UpcomingTask } from "@/lib/types/api"
 
 export default function DashboardPage() {
@@ -73,7 +73,7 @@ export default function DashboardPage() {
       {
         title: "Due Today",
         value: stats.dueTodayTasks.toString(),
-        description: stats.dueTodayTasks > 0 ? "Don't forget!" : "Nothing due today",
+        description: stats.dueTodayTasks > 0 ? "Don&apos;t forget!" : "Nothing due today",
         icon: Clock,
         color: "text-yellow-600",
       },
@@ -172,7 +172,7 @@ export default function DashboardPage() {
                 <div className="text-center py-8 text-muted-foreground">
                   <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p className="text-lg font-medium mb-2">No upcoming tasks</p>
-                  <p className="text-sm">You're all caught up! Consider creating a new task.</p>
+                  <p className="text-sm">You&apos;re all caught up! Consider creating a new task.</p>
                 </div>
               ) : (
                 upcomingTasks.map((task) => (

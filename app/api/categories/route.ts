@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating category:", error)
     
     // Handle unique constraint violation
-    if ((error as any).code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json(
         { error: "A category with this name already exists" },
         { status: 409 }

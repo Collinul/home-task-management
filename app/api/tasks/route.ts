@@ -23,7 +23,20 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0")
 
     // Build where clause
-    const where: any = {
+    const where: {
+      OR: Array<{
+        userId?: string;
+        household?: {
+          members: {
+            some: { userId: string };
+          };
+        };
+      }>;
+      isCompleted?: boolean;
+      priority?: string;
+      categoryId?: string;
+      householdId?: string;
+    } = {
       OR: [
         { userId }, // User's personal tasks
         { 
