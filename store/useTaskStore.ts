@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Task, Category, Household } from '../prisma/generated/client'
+import { Task, Category, Household } from '@prisma/client'
 
 export type TaskWithCategory = Task & {
   category: Category

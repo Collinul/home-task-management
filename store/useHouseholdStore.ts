@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Household, HouseholdMember, User } from '../prisma/generated/client'
+import { Household, HouseholdMember, User } from '@prisma/client'
 
 export type HouseholdWithMembers = Household & {
   members: (HouseholdMember & {
