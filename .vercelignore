@@ -1,0 +1,9 @@
+node_modules
+.env.local
+.env
+.git
+.vscode
+*.log
+coverage
+.nyc_output
+.eslintcache
