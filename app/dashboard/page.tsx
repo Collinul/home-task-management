@@ -2,12 +2,16 @@
 
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckSquare, Clock, AlertCircle, TrendingUp, Calendar } from "lucide-react"
 import { DashboardStats, UpcomingTask } from "@/lib/types/api"
+import { CreateTaskModal } from "@/components/modals/CreateTaskModal"
+import { InviteFamilyModal } from "@/components/modals/InviteFamilyModal"
 
 export default function DashboardPage() {
   const { data: session } = useSession()
+  const router = useRouter()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [upcomingTasks, setUpcomingTasks] = useState<UpcomingTask[]>([])
   const [loading, setLoading] = useState({
@@ -15,6 +19,8 @@ export default function DashboardPage() {
     tasks: true
   })
   const [error, setError] = useState<string | null>(null)
+  const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false)
+  const [inviteFamilyModalOpen, setInviteFamilyModalOpen] = useState(false)
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -216,21 +222,45 @@ export default function DashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <button className="w-full p-3 text-left rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+            <button 
+              onClick={() => setCreateTaskModalOpen(true)}
+              className="w-full p-3 text-left rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
               <div className="font-medium">Create New Task</div>
               <div className="text-sm opacity-80">Add a task to your list</div>
             </button>
-            <button className="w-full p-3 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+            <button 
+              onClick={() => setInviteFamilyModalOpen(true)}
+              className="w-full p-3 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+            >
               <div className="font-medium">Invite Family Member</div>
               <div className="text-sm text-muted-foreground">Share household tasks</div>
             </button>
-            <button className="w-full p-3 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+            <button 
+              onClick={() => router.push('/dashboard/calendar')}
+              className="w-full p-3 text-left rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+            >
               <div className="font-medium">View Calendar</div>
               <div className="text-sm text-muted-foreground">See all your tasks</div>
             </button>
           </CardContent>
         </Card>
       </div>
+
+      <CreateTaskModal 
+        open={createTaskModalOpen} 
+        onOpenChange={setCreateTaskModalOpen}
+        onTaskCreated={() => fetchDashboardData()}
+      />
+      
+      <InviteFamilyModal
+        open={inviteFamilyModalOpen}
+        onOpenChange={setInviteFamilyModalOpen}
+        onInviteSent={() => {
+          // Optionally refresh dashboard data or show success message
+          console.log("Invitation sent successfully!")
+        }}
+      />
     </div>
   )
 }
