@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
 import * as Avatar from "@radix-ui/react-avatar"
-import { cn, generateInitials } from "@/lib/utils"
+import { generateInitials } from "@/lib/utils"
+import { Logo } from "@/components/ui/logo"
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -21,6 +22,9 @@ export function Header({ onMenuClick }: HeaderProps) {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-6">
         <div className="flex items-center gap-4">
+          <div className="lg:hidden">
+            <Logo variant="icon" size="sm" />
+          </div>
           <Button
             variant="ghost"
             size="icon"

@@ -36,7 +36,7 @@ export default function SignInPage() {
           router.push("/dashboard")
         }
       }
-    } catch (error) {
+    } catch {
       setError("Something went wrong")
     } finally {
       setIsLoading(false)
@@ -113,7 +113,7 @@ export default function SignInPage() {
           </form>
           
           <div className="text-center text-sm">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/auth/signup" className="underline underline-offset-4 hover:text-primary">
               Sign up
             </Link>

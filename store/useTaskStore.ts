@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Task, Category, Household } from '../../../db/prisma/generated/client'
+import { Task, Category, Household } from '../prisma/generated/client'
 
 export type TaskWithCategory = Task & {
   category: Category
@@ -9,6 +9,11 @@ interface TaskStore {
   tasks: TaskWithCategory[]
   categories: Category[]
   selectedHousehold: Household | null
+  loading: {
+    tasks: boolean
+    categories: boolean
+  }
+  error: string | null
   filter: {
     status: 'all' | 'pending' | 'completed'
     priority: 'all' | 'high' | 'medium' | 'low'
@@ -31,6 +36,14 @@ interface TaskStore {
   setSelectedHousehold: (household: Household | null) => void
   setFilter: (filter: Partial<TaskStore['filter']>) => void
   
+  // Loading states
+  setLoading: (type: 'tasks' | 'categories', loading: boolean) => void
+  setError: (error: string | null) => void
+  
+  // API helpers
+  fetchTasks: () => Promise<void>
+  fetchCategories: () => Promise<void>
+  
   // Computed
   filteredTasks: () => TaskWithCategory[]
 }
@@ -39,6 +52,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   tasks: [],
   categories: [],
   selectedHousehold: null,
+  loading: {
+    tasks: false,
+    categories: false,
+  },
+  error: null,
   filter: {
     status: 'all',
     priority: 'all',
@@ -95,6 +113,66 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   setFilter: (filter) => set((state) => ({
     filter: { ...state.filter, ...filter }
   })),
+  
+  // Loading states
+  setLoading: (type, loading) => set((state) => ({
+    loading: { ...state.loading, [type]: loading }
+  })),
+  
+  setError: (error) => set({ error }),
+  
+  // API helpers
+  fetchTasks: async () => {
+    try {
+      set((state) => ({ 
+        loading: { ...state.loading, tasks: true },
+        error: null 
+      }))
+      
+      const response = await fetch('/api/tasks')
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks')
+      }
+      
+      const tasks = await response.json()
+      set({ tasks })
+    } catch (error) {
+      console.error('Error fetching tasks:', error)
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch tasks' 
+      })
+    } finally {
+      set((state) => ({ 
+        loading: { ...state.loading, tasks: false }
+      }))
+    }
+  },
+  
+  fetchCategories: async () => {
+    try {
+      set((state) => ({ 
+        loading: { ...state.loading, categories: true },
+        error: null 
+      }))
+      
+      const response = await fetch('/api/categories')
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories')
+      }
+      
+      const categories = await response.json()
+      set({ categories })
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch categories' 
+      })
+    } finally {
+      set((state) => ({ 
+        loading: { ...state.loading, categories: false }
+      }))
+    }
+  },
   
   filteredTasks: () => {
     const { tasks, filter } = get()

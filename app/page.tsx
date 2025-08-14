@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckSquare, Users, Calendar, BarChart3, ArrowRight, Star } from "lucide-react"
+import { CheckSquare, Users, Calendar, BarChart3, ArrowRight } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
 
 const features = [
   {
@@ -32,7 +33,7 @@ const features = [
 ]
 
 export default function Home() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
 
   useEffect(() => {
@@ -53,10 +54,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="border-b bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckSquare className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">TaskHub</span>
-          </div>
+          <Logo variant="full" size="lg" responsive />
           <div className="flex items-center gap-4">
             <Link href="/auth/signin">
               <Button variant="ghost">Sign In</Button>
@@ -122,41 +120,44 @@ export default function Home() {
 
         <section className="py-20 px-4 bg-white">
           <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">
-                  Trusted by families everywhere
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Join thousands of families who have transformed their household organization
-                </p>
-              </div>
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="text-3xl font-bold mb-4">
+                Simple, Powerful, Collaborative
+              </h2>
+              <p className="text-lg text-muted-foreground mb-12">
+                Everything you need to keep your household organized and running smoothly
+              </p>
               
-              <div className="grid md:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i}>
-                    <CardContent className="p-6">
-                      <div className="flex mb-4">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="mb-4">
-                        "TaskHub has completely transformed how our family manages household tasks. 
-                        Everything is so much more organized now!"
-                      </p>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <Users className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium">The Johnson Family</p>
-                          <p className="text-sm text-muted-foreground">Family of 4</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="p-6">
+                  <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckSquare className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Stay Organized</h3>
+                  <p className="text-muted-foreground">
+                    Keep track of all household tasks in one place with categories, priorities, and due dates.
+                  </p>
+                </div>
+                
+                <div className="p-6">
+                  <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Work Together</h3>
+                  <p className="text-muted-foreground">
+                    Invite family members to share responsibilities and collaborate on household management.
+                  </p>
+                </div>
+                
+                <div className="p-6">
+                  <div className="h-16 w-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <BarChart3 className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Track Progress</h3>
+                  <p className="text-muted-foreground">
+                    Monitor completion rates and see how your household productivity improves over time.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -165,9 +166,8 @@ export default function Home() {
 
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <CheckSquare className="h-6 w-6" />
-            <span className="text-xl font-bold">TaskHub</span>
+          <div className="flex justify-center mb-4">
+            <Logo variant="full" size="md" className="text-white" />
           </div>
           <p className="text-gray-400">
             Making household management simple and collaborative.

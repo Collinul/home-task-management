@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Logo } from "@/components/ui/logo"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
@@ -52,16 +53,25 @@ export function Sidebar({ className }: SidebarProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="font-bold text-xl"
           >
-            TaskHub
+            <Logo variant="full" size="md" />
+          </motion.div>
+        )}
+        {isCollapsed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex justify-center"
+          >
+            <Logo variant="icon" size="md" />
           </motion.div>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="ml-auto"
+          className={cn("transition-all", !isCollapsed && "ml-auto")}
         >
           {isCollapsed ? (
             <ChevronRight className="h-4 w-4" />

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Household, HouseholdMember, User } from '../../../db/prisma/generated/client'
+import { Household, HouseholdMember, User } from '../prisma/generated/client'
 
 export type HouseholdWithMembers = Household & {
   members: (HouseholdMember & {
@@ -10,6 +10,8 @@ export type HouseholdWithMembers = Household & {
 interface HouseholdStore {
   households: HouseholdWithMembers[]
   selectedHouseholdId: string | null
+  loading: boolean
+  error: string | null
   
   // Actions
   setHouseholds: (households: HouseholdWithMembers[]) => void
@@ -22,6 +24,13 @@ interface HouseholdStore {
   removeMemberFromHousehold: (householdId: string, memberId: string) => void
   updateMemberRole: (householdId: string, memberId: string, role: string) => void
   
+  // Loading states
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
+  
+  // API helpers
+  fetchHouseholds: () => Promise<void>
+  
   // Computed
   selectedHousehold: () => HouseholdWithMembers | null
 }
@@ -29,6 +38,8 @@ interface HouseholdStore {
 export const useHouseholdStore = create<HouseholdStore>((set, get) => ({
   households: [],
   selectedHouseholdId: null,
+  loading: false,
+  error: null,
   
   setHouseholds: (households) => set({ households }),
   
@@ -77,6 +88,32 @@ export const useHouseholdStore = create<HouseholdStore>((set, get) => ({
         : household
     )
   })),
+  
+  // Loading states
+  setLoading: (loading) => set({ loading }),
+  setError: (error) => set({ error }),
+  
+  // API helpers
+  fetchHouseholds: async () => {
+    try {
+      set({ loading: true, error: null })
+      
+      const response = await fetch('/api/households')
+      if (!response.ok) {
+        throw new Error('Failed to fetch households')
+      }
+      
+      const households = await response.json()
+      set({ households })
+    } catch (error) {
+      console.error('Error fetching households:', error)
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch households' 
+      })
+    } finally {
+      set({ loading: false })
+    }
+  },
   
   selectedHousehold: () => {
     const { households, selectedHouseholdId } = get()
