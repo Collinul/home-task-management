@@ -15,10 +15,15 @@ interface TaskStore {
   }
   error: string | null
   filter: {
-    status: 'all' | 'pending' | 'completed'
+    status: 'all' | 'pending' | 'completed' | 'overdue'
     priority: 'all' | 'high' | 'medium' | 'low'
     category: string | null
     assignedTo: string | null
+    dateRange: {
+      start: Date | null
+      end: Date | null
+    }
+    search: string
   }
   
   // Actions
@@ -62,6 +67,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     priority: 'all',
     category: null,
     assignedTo: null,
+    dateRange: {
+      start: null,
+      end: null
+    },
+    search: ''
   },
   
   setTasks: (tasks) => set({ tasks }),
@@ -178,14 +188,37 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     const { tasks, filter } = get()
     
     return tasks.filter((task) => {
+      // Status filter
       if (filter.status === 'completed' && !task.isCompleted) return false
       if (filter.status === 'pending' && task.isCompleted) return false
+      if (filter.status === 'overdue') {
+        const isOverdue = !task.isCompleted && new Date(task.dueDate) < new Date()
+        if (!isOverdue) return false
+      }
       
+      // Priority filter
       if (filter.priority !== 'all' && task.priority !== filter.priority) return false
       
+      // Category filter
       if (filter.category && task.categoryId !== filter.category) return false
       
+      // Assigned to filter
       if (filter.assignedTo && task.assignedToId !== filter.assignedTo) return false
+      
+      // Search filter
+      if (filter.search) {
+        const searchLower = filter.search.toLowerCase()
+        const matchesTitle = task.title.toLowerCase().includes(searchLower)
+        const matchesDescription = task.description?.toLowerCase().includes(searchLower)
+        if (!matchesTitle && !matchesDescription) return false
+      }
+      
+      // Date range filter
+      if (filter.dateRange.start || filter.dateRange.end) {
+        const taskDate = new Date(task.dueDate)
+        if (filter.dateRange.start && taskDate < filter.dateRange.start) return false
+        if (filter.dateRange.end && taskDate > filter.dateRange.end) return false
+      }
       
       return true
     })
