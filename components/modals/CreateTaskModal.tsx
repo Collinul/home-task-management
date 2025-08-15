@@ -32,12 +32,30 @@ export function CreateTaskModal({ open, onOpenChange, onTaskCreated }: CreateTas
   
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [initializingCategories, setInitializingCategories] = useState(false)
 
   useEffect(() => {
-    if (open && categories.length === 0) {
+    if (open) {
       fetchCategories()
     }
-  }, [open, categories.length, fetchCategories])
+  }, [open, fetchCategories])
+
+  const initializeDefaultCategories = async () => {
+    setInitializingCategories(true)
+    try {
+      const response = await fetch('/api/categories/initialize', {
+        method: 'POST'
+      })
+      
+      if (response.ok) {
+        await fetchCategories()
+      }
+    } catch (err) {
+      console.error('Failed to initialize categories:', err)
+    } finally {
+      setInitializingCategories(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,12 +64,6 @@ export function CreateTaskModal({ open, onOpenChange, onTaskCreated }: CreateTas
 
     if (!formData.title.trim()) {
       setError("Task title is required")
-      setLoading(false)
-      return
-    }
-
-    if (!formData.categoryId) {
-      setError("Please select a category")
       setLoading(false)
       return
     }
@@ -72,8 +84,8 @@ export function CreateTaskModal({ open, onOpenChange, onTaskCreated }: CreateTas
         title: formData.title,
         description: formData.description || null,
         dueDate: new Date(dueDateTime).toISOString(),
-        categoryId: formData.categoryId,
         priority: formData.priority,
+        categoryId: formData.categoryId || null,
         estimatedMinutes: formData.estimatedMinutes ? parseInt(formData.estimatedMinutes) : null,
         isCompleted: false
       }
@@ -183,7 +195,7 @@ export function CreateTaskModal({ open, onOpenChange, onTaskCreated }: CreateTas
               <div className="space-y-2">
                 <Label.Root htmlFor="dueTime" className="text-sm font-medium flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  Time (optional)
+                  Due Time (optional)
                 </Label.Root>
                 <Input
                   id="dueTime"
@@ -199,22 +211,39 @@ export function CreateTaskModal({ open, onOpenChange, onTaskCreated }: CreateTas
               <div className="space-y-2">
                 <Label.Root htmlFor="category" className="text-sm font-medium flex items-center gap-2">
                   <FolderOpen className="h-4 w-4" />
-                  Category *
+                  Category (optional)
                 </Label.Root>
-                <select
-                  id="category"
-                  value={formData.categoryId}
-                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
-                  required
-                >
-                  <option value="">Select category</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.emoji && `${category.emoji} `}{category.name}
-                    </option>
-                  ))}
-                </select>
+                {categories.length === 0 ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="text-sm text-muted-foreground px-3 py-2 border border-dashed rounded-md">
+                      No categories yet
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={initializeDefaultCategories}
+                      disabled={initializingCategories}
+                      className="w-full text-xs"
+                    >
+                      {initializingCategories ? "Creating..." : "Add default categories"}
+                    </Button>
+                  </div>
+                ) : (
+                  <select
+                    id="category"
+                    value={formData.categoryId || ""}
+                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                    className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+                  >
+                    <option value="">No category</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.emoji && `${category.emoji} `}{category.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="space-y-2">
